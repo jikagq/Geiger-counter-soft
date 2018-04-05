@@ -7,6 +7,8 @@ unsigned long previousMillis = 0;
 const long interval = 60000;           
 
 int count=0;
+float moy=0;
+int cpt=0;
 
 void setup() {
   Serial.begin(9600);
@@ -28,8 +30,13 @@ void loop() {
 
     int cpm = count;
     count=0;//raz du compteur pour la prochaine minute de comptage
-    Serial.print("cpm: ");
+    Serial.print("cpm instantané: ");
     Serial.println(cpm);
+
+    Serial.print("cpm moyen: ");
+    cpt++;
+    moy=(cpm+moy)/cpt;
+    Serial.println(moy);
     
     cpmtosiever(cpm);//converion cpm en siever
 
