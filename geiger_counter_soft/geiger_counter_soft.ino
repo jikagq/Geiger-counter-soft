@@ -10,10 +10,10 @@
 #define OLED_RESET     4 // Reset pin # (or -1 if sharing Arduino reset pin)
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-
+#define LOG_PERIOD 15000 //comptage sur 1min
 #define CONV_FACTOR 0.0117
 #define HWver 0.2
-#define SWver 0.1
+#define SWver 0.2
 
 const int ledPin =  LED_BUILTIN;
 const int pulse = 2;
@@ -24,6 +24,7 @@ int ledState = LOW;
 
 unsigned long previousMillis = 0;        
 const long interval = 60000; //60000          
+int multiplier = 0;
 
 volatile int count=0;
 volatile int bip = 0;
@@ -52,30 +53,24 @@ void setup() {
   digitalWrite(ledPulse, LOW );
   digitalWrite(buzzer, LOW);
 
+  multiplier = interval / LOG_PERIOD;
+
   attachInterrupt(digitalPinToInterrupt(pulse), countparticle, FALLING);
 
-  //ssd1306 command
 
+
+  //ssd1306 command
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3C for 128x32
     Serial.println(F("SSD1306 allocation failed"));
     for(;;); // Don't proceed, loop forever
   }
-
   // Clear the buffer
   display.clearDisplay();
   display.drawPixel(0, 0, SSD1306_WHITE);
   display.display();
   display.clearDisplay();
-
-  //nuclear icon
-  /*display.drawBitmap(112,0,nuclearBitmap,16,8,WHITE);
-  display.display();*/
-
-  //display.drawBitmap(32,0,radresBitmap,48,24,WHITE);
-  //display.display();
-
-  
+   
   //affichage nom + version + logo
   //hazardeous splash
   display.fillRect(96, 0, 32, 32, WHITE);
@@ -128,9 +123,9 @@ void loop() {
  
  
  unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis >= interval) {//1min ecoulée
+  if (currentMillis - previousMillis >= LOG_PERIOD) {//1min ecoulée
 
-    int cpm = count;
+    int cpm = count * multiplier;
     count=0;//raz du compteur pour la prochaine minute de comptage
     Serial.print("cpm instantané: ");
     Serial.println(cpm);
